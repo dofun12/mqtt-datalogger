@@ -11,6 +11,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import javax.swing.*;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Date;
 
 @SpringBootApplication
@@ -29,13 +32,6 @@ public class MqttDataloggerApplication  implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        HouseChart chart = new HouseChart();
-        JFrame frame = new JFrame();
-        frame.setSize(1200,600);
-        frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        frame.getContentPane().add(chart.getMainPanel());
-        frame.setVisible(true);
-
 
         MqttHelper mqttHelper = new MqttHelper(brokerurl);
         mqttHelper.subscribe( 1, (topic, mqttMessage) -> {
@@ -47,8 +43,11 @@ public class MqttDataloggerApplication  implements ApplicationRunner {
             String value = new String(mqttMessage.getPayload());
             Double doubleValue = Double.parseDouble(value);
 
+
+            OffsetDateTime dateTime = OffsetDateTime.now(ZoneOffset.UTC);
+
             CollectorModel collectorModel = new CollectorModel();
-            collectorModel.setCreated(new Date());
+            collectorModel.setCreated(new Date(dateTime.toInstant().toEpochMilli()));
             collectorModel.setGroupName(groupName);
             collectorModel.setHeaderName(headerName);
             collectorModel.setIdDevice(deviceId);
